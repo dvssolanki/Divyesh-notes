@@ -1,0 +1,294 @@
+Bitnami Server setup
+----------------------
+Code Path
+cd /home/bitnami/htdocs/
+
+#Full Path
+/opt/bitnami/apache2/htdocs/
+
+Conf file Path
+cd /opt/bitnami/apache2/conf/bitnami    
+
+#syntax check
+sudo /opt/bitnami/apache2/bin/apachectl -t
+
+# Bitnami Services Status/Start/Restart
+
+sudo /opt/bitnami/ctlscript.sh start
+sudo /opt/bitnami/ctlscript.sh restart apache
+sudo /opt/bitnami/ctlscript.sh status apache
+sudo /opt/bitnami/ctlscript.sh stop apache
+
+#Create SSl Certy
+
+sudo /opt/bitnami/ctlscript.sh stop apache
+
+sudo certbot certonly --standalone --preferred-challenges http -d abc.examople.com
+
+#DB
+sudo /opt/bitnami/mariadb/bin/mysql -u root -p
+sudo /opt/bitnami/mariadb/bin/mariadb -u root -p
+
+#Bitnami default credentials
+cat /home/bitnami/bitnami_credentials
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+
+#ssh tunnel #Run in Server
+ssh -N -L 8081:127.0.0.1:443 -i pemfile-name.pem bitnami@192.168.1.1
+
+#ssh tunnel if you have Username and password
+ssh -N -L 8081:127.0.0.1:443 tim@192.168.1.1
+
+
+#Connect phpmyadmin in browser #Run in Local PC
+http://127.0.0.1:8081/phpmyadmin/
+https://127.0.0.1:8081/phpmyadmin/
+
+
+#phpmy admin file
+/opt/bitnami/phpmyadmin/config.inc.php
+/opt/bitnami/apps/phpmyadmin/htdocs/config.inc.php
+
+# phpMyAdmin default Apache configuration
+
+/opt/bitnami/apache2/conf/bitnami
+Alias /phpmyadmin "/opt/bitnami/phpmyadmin"
+<Directory "/opt/bitnami/phpmyadmin">
+  Options -Indexes +FollowSymLinks -MultiViews
+  AllowOverride All
+  Require local
+  ErrorDocument 403 "For security reasons, this URL is only accessible using localhost (127.0.0.1) as the hostname."
+  # AuthType Basic
+  # AuthName phpmyadmin
+  # AuthUserFile "/opt/bitnami/apache/users"
+  # Require valid-user
+</Directory>
+
+#php.ini file path
+sudo nano /opt/bitnami/php/etc/php.ini
+
+#database.php file path
+/opt/bitnami/frameworks/laravel/config/database.php
+
+
+#find folder name
+sudo find / -type d -name 'cloudwatch'
+
+#find file name
+sudo find / -type f -name 'cloudwatch'
+
+#check pm2 status
+pm2 status
+
+#Git clone
+git clone -b dev git url .
+
+#Install Bitnami in ubuntu server
+sudo chmod +x file name
+sudo ./file name or  sudo sh filename
+
+#####################################---AWS EC2 instance---###################################################################
+
+AWS EC2 instance Apache,
+---------------------
+#Apache Conf Path
+ /etc/apache2/sites-available
+
+ #Project path 
+ /var/www/html
+
+#Install PHP
+sudo apt update -y
+
+#Install PHP 8.3:
+sudo apt install software-properties-common -y
+sudo add-apt-repository ppa:ondrej/php -y
+sudo apt update -y
+sudo apt install php8.3 -y
+php -v
+
+#Install PHP dependencies:
+sudo apt install php8.3-bcmath php8.3-dom php8.3-curl php8.3-gd php8.3-gmp php8.3-igbinary php8.3-imagick php8.3-imap -y php8.3-intl php8.3-mbstring php8.3-memcached php8.3-mysql php8.3-pgsql php8.3-redis php8.3-soap php8.3-swoole php8.3-zip php8.3-sqlite3 php8.3-imagick -y
+
+#install Apache2
+sudo apt update
+sudo apt install apache2
+
+#Apache service Start/Stop
+sudo systemctl status apache2.service 
+sudo systemctl stop apache2.service 
+sudo systemctl disable apache2.service 
+
+#SSL Certy
+#Stop Apache service
+ sudo certbot certonly --standalone --preferred-challenges http -d abc.example.com
+Start Apache service
+
+#Syntex Check
+sudo apachectl -t
+
+ #sites-available path 
+/etc/apache2/sites-available
+
+#Site enabled Path
+/etc/apache2/sites-enabled
+
+#Git clone
+git clone -b dev git url .
+
+-------------------------Supervisor---------------------------------
+#Supervisor config:
+cd /etc/supervisor/conf.d/
+
+sudo supervisorctl start all
+sudo supervisorctl restart all
+Sudo systemctl status supervisor.services
+
+Tail -f supervisor-worker.log
+
+-----------------------composer----------------------
+
+#install composer
+
+sudo apt update -y
+sudo apt install php8.3-cli unzip -y
+cd ~
+curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+HASH=`curl -sS https://composer.github.io/installer.sig`
+php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+composer --version
+
+
+---------------------------MYSQL-------------------
+https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
+
+sudo apt update
+sudo apt install mysql-server
+sudo systemctl start mysql.service
+
+sudo mysql
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+
+exit
+
+mysql -u root -p
+
+SHOW DATABASES;
+
+#Take backup in ubuntu
+mysqldump -u root -p dvsdb > /home/ubuntu/dvs_backup.sql
+
+#restore the database
+mysql -u root -p bak_dvs_db < dvs_backup.sql
+
+
+#For open ssh tanul (need to add require local in bellow path)
+
+sudo nano /etc/apache2/conf-available/phpmyadmin.conf
+
+Require local
+
+------------EX--------------------
+# phpMyAdmin default Apache configuration
+
+Alias /phpmyadmin /usr/share/phpmyadmin
+
+<Directory /usr/share/phpmyadmin>
+    Options SymLinksIfOwnerMatch
+    DirectoryIndex index.php
+    Require local
+    # limit libapache2-mod-php to files and directories necessary by pma
+    <IfModule mod_php7.c>
+        php_admin_value upload_tmp_dir /var/lib/phpmyadmin/tmp
+        php_admin_value open_basedir /usr/share/phpmyadmin/:/usr/share/doc/phpmyadmin/:/etc/phpmyadmin/:/var/lib/phpmyadmin/:/usr/share/php/:/usr/sha>
+    </IfModule>
+
+</Directory>
+
+
+
+------------------------phpMyAdmin-----------------
+https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04
+
+sudo apt update
+sudo apt install phpmyadmin php-mbstring php-zip php-gd php-json php-curl
+sudo apt install phpmyadmin
+
+sudo systemctl restart apache2
+
+#ssh tunnel #Run in Server
+ssh -N -L 8081:127.0.0.1:443 -i pemfile-name.pem bitnami@192.168.1.1
+
+#Connect phpmyadmin in browser #Run in Local PC
+http://127.0.0.1:8081/phpmyadmin/
+
+#phpmy admin file
+/opt/bitnami/phpmyadmin/config.inc.php
+
+sudo nano /etc/phpmyadmin/config.inc.php
+
+---------------------Enable the Site------------------
+
+cd /etc/apache2/sites-available/
+
+#check syntax
+sudo apache2ctl configtest
+
+sudo systemctl stop apache2
+
+#Enable the site configuration
+sudo a2ensite your_site.conf
+
+sudo systemctl reload apache2
+sudo systemctl status apache2
+
+----------------------Install NVM--------------
+
+sudo apt update
+sudo apt install curl
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.bashrc
+nvm --version
+nvm install 20
+nvm use 20
+node -v
+npm -v
+
+#Install PM2
+npm install -g pm2
+pm2
+pm2 ls
+
+#install yarn
+npm install -g yarn
+yarn --version
+
+---------Swap memeory----------------
+htop
+udo swapon --show
+free -h
+df -h
+sudo fallocate -l 8G /swapfile
+ls -lh /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo swapon --show
+
+---------crontab-------------
+crontab -e -u bitnami
+
+sudo /opt/bitnami/ctlscript.sh status
+
+------------Install Certbot-------------
+sudo apt update
+
+#for apache
+sudo apt install certbot python3-certbot-apache
+
+#For Nginx
+sudo apt install certbot python3-certbot-nginx
+
