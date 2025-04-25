@@ -12,6 +12,16 @@ cd /opt/bitnami/apache2/conf/bitnami
 #syntax check
 sudo /opt/bitnami/apache2/bin/apachectl -t
 
+# supervisor path
+/etc/supervisor/conf.d
+
+sudo apt install supervisor
+sudo systemctl status supervisor
+
+
+# composer path
+/opt/bitnami/php/bin
+
 # Bitnami Services Status/Start/Restart
 
 sudo /opt/bitnami/ctlscript.sh start
@@ -23,28 +33,79 @@ sudo /opt/bitnami/ctlscript.sh stop apache
 
 sudo /opt/bitnami/ctlscript.sh stop apache
 
-sudo certbot certonly --standalone --preferred-challenges http -d abc.examople.com
+sudo certbot certonly --standalone --preferred-challenges http -d fixitadmin.topsdemo.in
+
+#Default bitnami SSL
+sudo /opt/bitnami/bncert-tool 
+
+#renew Let's Encrypt SSL
+sudo systemctl stop apache2
+sudo certbot renew --cert-name app.airaco.com
+sudo systemctl start apache2
+
+#renew SSL in Bitnami with two domain (WWW)
+sudo /opt/bitnami/letsencrypt/lego --tls --email="kailash@topsinfosolutions.com" --domains="sellerlogix.ai" --domains="www.sellerlogix.ai" --path="/opt/bitnami/letsencrypt" renew
+
+#renew SSL in Bitnami
+sudo /opt/bitnami/letsencrypt/lego --tls --email="kailash@topsinfosolutions.com" --domains="sellerlogix.ai" --path="/opt/bitnami/letsencrypt" renew
 
 #DB
 sudo /opt/bitnami/mariadb/bin/mysql -u root -p
 sudo /opt/bitnami/mariadb/bin/mariadb -u root -p
+/opt/bitnami/mariadb/bin/mysql -u root -p
+
+#connect in local system
+mysql -h 3.18.55.92 -u root -p
+
+#exit in database 
+\q
 
 #Bitnami default credentials
 cat /home/bitnami/bitnami_credentials
 
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
 
+#Confirm the Root User's Existence
+SELECT User, Host FROM mysql.user;
+
++--------------+-----------+
+| User         | Host      |
++--------------+-----------+
+| bn_wordpress | %         |
+| root         | %         |
+| mariadb.sys  | localhost |
++--------------+-----------+
+
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'GjkAd42DUp';
+
+ALTER USER 'root'@'%' IDENTIFIED VIA mysql_native_password USING PASSWORD('GjkAd42DUp');
+
+ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('NewGjkAd42DUp');
+FLUSH PRIVILEGES;
+
+
+
+#User full permission
+GRANT ALL PRIVILEGES ON *.* TO 'topscoin_fbatool1'@'localhost' IDENTIFIED BY ;
+FLUSH PRIVILEGES;
+
+
+
 #ssh tunnel #Run in Server
-ssh -N -L 8081:127.0.0.1:443 -i pemfile-name.pem bitnami@192.168.1.1
+ssh -N -L 8081:127.0.0.1:443 -i fixittoday-qa.pem bitnami@43.204.123.5
 
 #ssh tunnel if you have Username and password
-ssh -N -L 8081:127.0.0.1:443 tim@192.168.1.1
+ssh -N -L 8081:127.0.0.1:443 tim@38.64.99.12
 
 
 #Connect phpmyadmin in browser #Run in Local PC
 http://127.0.0.1:8081/phpmyadmin/
 https://127.0.0.1:8081/phpmyadmin/
 
+# check Darabase list
+SHOW DATABASES;
 
 #phpmy admin file
 /opt/bitnami/phpmyadmin/config.inc.php
@@ -88,7 +149,35 @@ git clone -b dev git url .
 sudo chmod +x file name
 sudo ./file name or  sudo sh filename
 
+#Check mysql version
+sudo /opt/bitnami/mariadb/bin/mysql --version
+
+----------Wildcard Certificates using Let’s Encrypt (Certbot)----
+
+https://www.linkedin.com/pulse/wildcard-certificates-using-lets-encrypt-certbot-pallavi-udhane
+Added 4 line in bitnami-ssl.conf and change the SSLCertificateFile & SSLCertificateKeyFile
+ServerName stratikims.org
+ServerAlias *.stratikims.org
+SSLCertificateFile "/etc/letsencrypt/live/stratikims.org/fullchain.pem"
+SSLCertificateKeyFile "/etc/letsencrypt/live/stratikims.org/privkey.pem"
+
+#access log
+sudo grep -i "GET" /opt/bitnami/apache/logs/access_log | awk '{print $1}' | sort | uniq -c | sort -nr
+
+For novok
+sudo grep 185.182.184.152 /var/log/nginx/access.log
+
+sudo grep /supplier-admins/179/supplier-minimum-requirements /var/log/nginx/access.log
+
+#search for IP
+sudo grep 194.163.132.135 /opt/bitnami/apache2/logs/access_log
+
+#Check SSL Certy Provaider
+echo | openssl s_client -connect playbox.buyingstation.com:443 -servername playbox.buyingstation.com | openssl x509 -noout -issuer -subject -dates
+
+
 #####################################---AWS EC2 instance---###################################################################
+
 
 AWS EC2 instance Apache,
 ---------------------
@@ -108,8 +197,11 @@ sudo apt update -y
 sudo apt install php8.3 -y
 php -v
 
+
 #Install PHP dependencies:
 sudo apt install php8.3-bcmath php8.3-dom php8.3-curl php8.3-gd php8.3-gmp php8.3-igbinary php8.3-imagick php8.3-imap -y php8.3-intl php8.3-mbstring php8.3-memcached php8.3-mysql php8.3-pgsql php8.3-redis php8.3-soap php8.3-swoole php8.3-zip php8.3-sqlite3 php8.3-imagick -y
+
+
 
 #install Apache2
 sudo apt update
@@ -122,11 +214,16 @@ sudo systemctl disable apache2.service
 
 #SSL Certy
 #Stop Apache service
- sudo certbot certonly --standalone --preferred-challenges http -d abc.example.com
+ sudo certbot certonly --standalone --preferred-challenges http -d fixitadmin.topsdemo.in
 Start Apache service
+
+#SSL Certy First time
+sudo certbot --apache -d qa-mission-give-backend.topsdemo.in
 
 #Syntex Check
 sudo apachectl -t
+sudo apachectl configtest
+
 
  #sites-available path 
 /etc/apache2/sites-available
@@ -181,6 +278,20 @@ SHOW DATABASES;
 #Take backup in ubuntu
 mysqldump -u root -p dvsdb > /home/ubuntu/dvs_backup.sql
 
+# with verbose mode
+mysqldump --verbose -u root -p euro-parts > euro-parts-live.sql
+
+#direct to my local system 
+mysql -h 122.164.127.123 -u root -p 
+
+mysqldump -h 122.164.127.123 -u root -p demo_db > demo_db.sql 
+
+#Create Database
+CREATE DATABASE fosonlin_cmp_sites;
+
+#Delete Database
+DROP DATABASE fosonlin_cmp_sites;
+
 #restore the database
 mysql -u root -p bak_dvs_db < dvs_backup.sql
 
@@ -220,10 +331,12 @@ sudo apt install phpmyadmin
 sudo systemctl restart apache2
 
 #ssh tunnel #Run in Server
-ssh -N -L 8081:127.0.0.1:443 -i pemfile-name.pem bitnami@192.168.1.1
+ssh -N -L 8081:127.0.0.1:443 -i fixittoday-qa.pem bitnami@43.204.123.5
 
 #Connect phpmyadmin in browser #Run in Local PC
 http://127.0.0.1:8081/phpmyadmin/
+
+mysql -u root -p
 
 #phpmy admin file
 /opt/bitnami/phpmyadmin/config.inc.php
@@ -267,19 +380,19 @@ npm install -g yarn
 yarn --version
 
 ---------Swap memeory----------------
-htop
-udo swapon --show
-free -h
-df -h
+
 sudo fallocate -l 8G /swapfile
-ls -lh /swapfile
+sudo dd if=/dev/zero of=/swapfile bs=1M count=8192
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
 sudo swapon --show
-
+free -h
+echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+htop
 ---------crontab-------------
 crontab -e -u bitnami
+
 
 sudo /opt/bitnami/ctlscript.sh status
 
@@ -292,3 +405,44 @@ sudo apt install certbot python3-certbot-apache
 #For Nginx
 sudo apt install certbot python3-certbot-nginx
 
+#access log
+sudo grep -i "GET" /var/log/nginx/access.log | awk '{print $1}' | sort | uniq -c | sort -nr
+
+
+
+------------------------------------------------------------------------------------------------------
+#install wordpress
+
+cd /var/www/html
+sudo wget https://wordpress.org/latest.zip
+sudo unzip latest.zip
+sudo mv wordpress/* .
+sudo rm -rf wordpress latest.zip
+
+
+-----------#Postgress------------------------
+su - postgres
+
+psql -U postgres
+
+#Check Database name
+SELECT current_database();
+
+-------------S3 Bucket upload-----------------------------
+
+#Install AWS CLI
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+aws --version
+aws configure
+  AWS Access Key ID
+  AWS Secret Access Key
+  Default region (e.g., us-east-1)
+  
+aws s3 ls
+
+#Uload file on S3
+aws s3 cp /opt/bitnami/apache2/htdocs/csf-merchant-laravel.zip s3://div12/csf-merchant-laravel.zip
+
+#Download the File from S3
+aws s3 cp s3://div12/csf-merchant-laravel.zip /opt/bitnami/apache2/htdocs/
